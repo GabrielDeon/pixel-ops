@@ -35,10 +35,6 @@ html, body {
   min-height: 100%; /* Make sure it takes up full viewport height */
 }
 
-main {
-  flex: 1;
-}
-
 /* Basic styles for headers and text */
 h1, h2, h3, h4, h5, h6 {  
   margin: 0;
@@ -63,9 +59,4 @@ a {
 
 a:hover {
   text-decoration: underline; /* Underline on hover for accessibility */
-}
-
-/* Style for the main content area */
-main {
-  flex: 1; /* Ensure main takes available space */
 }

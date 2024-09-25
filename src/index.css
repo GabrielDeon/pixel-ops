@@ -16,7 +16,7 @@
 /* Ensure the html and body take full height */
 html, body {
   height: 100%;
-  background-color: var(--background-color);
+  background-color: var(--gray-nurse);
   margin: 0;
   padding: 0;
   font-family: var(--font-poppins), sans-serif; /* Use a clean, sans-serif font */
@@ -35,6 +35,10 @@ html, body {
   min-height: 100%; /* Make sure it takes up full viewport height */
 }
 
+main {
+  flex: 1;
+}
+
 /* Basic styles for headers and text */
 h1, h2, h3, h4, h5, h6 {  
   margin: 0;
@@ -48,8 +52,7 @@ h1 {
 
 p { 
   font-family: var(--font-poppins);
-  margin: 0;
-  padding: 0;
+
 }
 
 /* Style links */

@@ -1,50 +1,108 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Download, Image as ImageIcon } from "lucide-react"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Download, Image as ImageIcon } from "lucide-react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Badge } from "@/components/ui/badge";
 
 interface ImageDownloaderProps {
-  imageUrl: string | null
-  altText: string
+  imageUrl: string | null;
+  altText: string;
 }
 
-export default function ImageDownloader({ imageUrl, altText }: ImageDownloaderProps) {
-  const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
+export default function ImageDownloader({
+  imageUrl,
+  altText,
+}: ImageDownloaderProps) {
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [objectFit, setObjectFit] = useState<
+    "contain" | "cover" | "fill" | "none"
+  >("contain");
 
   useEffect(() => {
     if (imageUrl) {
       fetch(imageUrl)
-        .then(response => response.blob())
-        .then(blob => {
-          const url = window.URL.createObjectURL(blob)
-          setDownloadUrl(url)
+        .then((response) => response.blob())
+        .then((blob) => {
+          const url = window.URL.createObjectURL(blob);
+          setDownloadUrl(url);
         })
-        .catch(error => console.error('Error creating download URL:', error))
+        .catch((error) => console.error("Error creating download URL:", error));
     }
-  }, [imageUrl])
+  }, [imageUrl]);
 
   const handleDownload = () => {
     if (downloadUrl) {
-      const link = document.createElement('a')
-      link.href = downloadUrl
-      link.download = 'processed-image.png' // You can customize the filename here
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = "processed-image.png"; // You can customize the filename here
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
-  }
+  };
 
   return (
-    <Card className="w-72 h-96 flex flex-col">
-      <div className="flex-grow p-4">
-        <div className="w-full h-full flex items-center justify-center bg-muted rounded-md overflow-hidden">
+    <Card className="w-72 h-max flex flex-col">
+      <div className="p-2 border-b">
+        <ToggleGroup
+          type="single"
+          value={objectFit}
+          onValueChange={(value) =>
+            setObjectFit(value as "contain" | "cover" | "fill" | "none")
+          }
+          className="justify-center space-x-1"
+        >
+          <ToggleGroupItem
+            value="contain"
+            aria-label="Set object-fit to contain"
+            className="text-xs px-2 py-1"
+          >
+            Contain
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="cover"
+            aria-label="Set object-fit to cover"
+            className="text-xs px-2 py-1"
+          >
+            Cover
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="fill"
+            aria-label="Set object-fit to fill"
+            className="text-xs px-2 py-1"
+          >
+            Fill
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="none"
+            aria-label="Set object-fit to none"
+            className="text-xs px-2 py-1"
+          >
+            None
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
+      <div className="p-4">
+        <div
+          className="relative bg-muted rounded-md overflow-hidden"
+          style={{ width: "100%", height: "250px" }}
+        >
+          {downloadUrl ? (
+            <Badge
+              className="absolute top-0 right-0 m-2 text-black z-10 border-black"
+              variant="outline"
+            >
+              To-Do
+            </Badge>
+          ) : null}
           {imageUrl ? (
             <img
               src={imageUrl}
               alt={altText}
-              className="w-full h-full object-cover"
+              className={`w-full h-full object-${objectFit}`}
             />
           ) : (
             <div className="text-center text-muted-foreground">
@@ -55,8 +113,8 @@ export default function ImageDownloader({ imageUrl, altText }: ImageDownloaderPr
         </div>
       </div>
       <div className="p-4 border-t">
-        <Button 
-          onClick={handleDownload} 
+        <Button
+          onClick={handleDownload}
           className="w-full"
           disabled={!downloadUrl}
         >
@@ -64,5 +122,5 @@ export default function ImageDownloader({ imageUrl, altText }: ImageDownloaderPr
         </Button>
       </div>
     </Card>
-  )
+  );
 }

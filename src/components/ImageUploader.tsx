@@ -7,13 +7,16 @@ import { Input } from "@/components/ui/input";
 import { AlertCircle, Upload } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface ImageUploaderProps {
-  onImageProcessed: (pixelMatrix: number[][][]) => void;
+  onImageProcessed: (pixelMatrix: number[][][], mainImage: boolean) => void;
+  mainImage: boolean;
 }
 
 export default function ImageUploader({
   onImageProcessed,
+  mainImage,
 }: ImageUploaderProps) {
   const [image, setImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +24,9 @@ export default function ImageUploader({
     width: number;
     height: number;
   } | null>(null);
+  const [objectFit, setObjectFit] = useState<
+    "contain" | "cover" | "fill" | "none"
+  >("contain");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -44,18 +50,18 @@ export default function ImageUploader({
         for (let x = 0; x < img.width; x++) {
           const i = (y * img.width + x) * 4;
           row.push([
-            imageData.data[i], // Red
-            imageData.data[i + 1], // Green
-            imageData.data[i + 2], // Blue
-            imageData.data[i + 3], // Alpha
+            imageData.data[i],
+            imageData.data[i + 1],
+            imageData.data[i + 2],
+            imageData.data[i + 3],
           ]);
         }
         pixelMatrix.push(row);
       }
 
-      onImageProcessed(pixelMatrix);
+      onImageProcessed(pixelMatrix, mainImage);
     },
-    [onImageProcessed]
+    [onImageProcessed, mainImage]
   );
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,8 +91,47 @@ export default function ImageUploader({
   };
 
   return (
-    <Card className="w-72 h-96 flex flex-col">
-      <div className="flex-grow p-4">
+    <Card className="w-72 h-max flex flex-col">
+      <div className="p-2 border-b">
+        <ToggleGroup
+          type="single"
+          value={objectFit}
+          onValueChange={(value) =>
+            setObjectFit(value as "contain" | "cover" | "fill" | "none")
+          }
+          className="justify-center space-x-1"
+        >
+          <ToggleGroupItem
+            value="contain"
+            aria-label="Set object-fit to contain"
+            className="text-xs px-2 py-1"
+          >
+            Contain
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="cover"
+            aria-label="Set object-fit to cover"
+            className="text-xs px-2 py-1"
+          >
+            Cover
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="fill"
+            aria-label="Set object-fit to fill"
+            className="text-xs px-2 py-1"
+          >
+            Fill
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="none"
+            aria-label="Set object-fit to none"
+            className="text-xs px-2 py-1"
+          >
+            None
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
+      <div className="p-4">
         {error && (
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
@@ -94,22 +139,33 @@ export default function ImageUploader({
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        <div className="relative w-full h-full flex items-center justify-center bg-muted rounded-md overflow-hidden">
+        <div
+          className="relative bg-muted rounded-md overflow-hidden"
+          style={{ width: "100%", height: "250px" }}
+        >
+          {image ? (
+            <Badge
+              className="absolute top-0 right-0 m-2 text-black z-10 border-black"
+              variant="outline"
+            >
+              {resolution?.width} x {resolution?.height}
+            </Badge>
+          ) : null}
+
           {image ? (
             <>
-              <Badge className="absolute top-0 right-0 m-2 text-white" variant="outline">
-                {resolution?.width} x {resolution?.height}
-              </Badge>
               <img
                 src={image}
                 alt="Uploaded preview"
-                className="w-full h-full object-fill"
+                className={`w-full h-full object-${objectFit}`}
               />
             </>
           ) : (
-            <div className="text-center text-muted-foreground">
-              <Upload className="mx-auto h-12 w-12 mb-2" />
-              <p>No image uploaded</p>
+            <div className="flex items-center justify-center w-full h-full text-center text-muted-foreground">
+              <div>
+                <Upload className="mx-auto h-12 w-12 mb-2" />
+                <p>No image uploaded</p>
+              </div>
             </div>
           )}
         </div>

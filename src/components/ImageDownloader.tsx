@@ -87,22 +87,23 @@ export default function ImageDownloader({
       </div>
       <div className="p-4">
         <div
-          className="relative bg-muted rounded-md overflow-hidden"
+          className="flex justify-center items-center bg-muted rounded-md overflow-hidden relative"
           style={{ width: "100%", height: "250px" }}
         >
-          {downloadUrl ? (
-            <Badge
-              className="absolute top-0 right-0 m-2 text-black z-10 border-black"
+          {downloadUrl && (
+            <Badge              
               variant="outline"
+              className="absolute top-2 right-2 z-10 text-black border-black bg-gray-100 bg-blend-color-dodge bg-opacity-25"
             >
               To-Do
             </Badge>
-          ) : null}
+          )}          
           {imageUrl ? (
             <img
               src={imageUrl}
               alt={altText}
-              className={`w-full h-full object-${objectFit}`}
+              className={`w-full h-full`}
+              style={{ objectFit: objectFit }}
             />
           ) : (
             <div className="text-center text-muted-foreground">

@@ -8,6 +8,20 @@ import { AlertCircle, Upload } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "./ui/drawer";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import MatrixOperationsCard from "./matrix-operations-card";
+import { getImageMatrice } from "@/imageUtils/transformations";
+
+import { faGear } from "@fortawesome/free-solid-svg-icons";
 
 interface ImageUploaderProps {
   onImageProcessed: (pixelMatrix: number[][][], mainImage: boolean) => void;
@@ -20,13 +34,12 @@ export default function ImageUploader({
 }: ImageUploaderProps) {
   const [image, setImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [resolution, setResolution] = useState<{
-    width: number;
-    height: number;
-  } | null>(null);
+  const [matrice, setMatrice] = useState<number[][][] | null>(null);
+
   const [objectFit, setObjectFit] = useState<
     "contain" | "cover" | "fill" | "none"
   >("contain");
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -37,31 +50,12 @@ export default function ImageUploader({
 
       canvas.width = img.width;
       canvas.height = img.height;
-      setResolution({ width: img.width, height: img.height });
-      const ctx = canvas.getContext("2d", { willReadFrequently: true });
-      if (!ctx) return;
 
-      ctx.drawImage(img, 0, 0, img.width, img.height);
-      const imageData = ctx.getImageData(0, 0, img.width, img.height);
-      const pixelMatrix: number[][][] = [];
+      setMatrice(getImageMatrice(img) || null);
 
-      for (let y = 0; y < img.height; y++) {
-        const row: number[][] = [];
-        for (let x = 0; x < img.width; x++) {
-          const i = (y * img.width + x) * 4;
-          row.push([
-            imageData.data[i],
-            imageData.data[i + 1],
-            imageData.data[i + 2],
-            imageData.data[i + 3],
-          ]);
-        }
-        pixelMatrix.push(row);
-      }
-
-      onImageProcessed(pixelMatrix, mainImage);
+      onImageProcessed(matrice || [], mainImage);
     },
-    [onImageProcessed, mainImage]
+    [onImageProcessed, matrice, mainImage]
   );
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,7 +86,41 @@ export default function ImageUploader({
 
   return (
     <Card className="w-72 h-max flex flex-col">
-      <div className="p-2 border-b">
+      <div className="p-2 border-b relative">
+        {image ? (
+          <Drawer>
+            <DrawerTrigger className="absolute top-0 right-1 text-blue-950 hover:text-blue-900">
+              <FontAwesomeIcon icon={faGear} />
+            </DrawerTrigger>
+            <DrawerContent className="flex flex-col items-center justify-center p-6">
+              <div className="w-full max-w-4xl">
+                <DrawerHeader className="text-center">
+                  <DrawerTitle></DrawerTitle>
+                </DrawerHeader>
+                <div className="flex flex-row space-x-4 justify-center items-stretch">
+                  <img
+                    src={image}
+                    alt="Uploaded preview"
+                    className="w-1/2 h-64 object-fill rounded-md border-solid border-2"
+                  />
+                  <MatrixOperationsCard className="w-1/2 h-64" />
+                </div>
+                <DrawerFooter className="flex flex-col items-center mt-6">
+                  <div className="flex space-x-4 w-full justify-between">
+                    <Button className="flex-1">Reset</Button>
+                    <Button className="flex-1">Download</Button>
+                    <Button className="flex-1">Apply</Button>
+                    <DrawerClose asChild>
+                      <Button variant="outline" className="flex-1">
+                        Close
+                      </Button>
+                    </DrawerClose>
+                  </div>
+                </DrawerFooter>
+              </div>
+            </DrawerContent>
+          </Drawer>
+        ) : null}
         <ToggleGroup
           type="single"
           value={objectFit}
@@ -144,12 +172,13 @@ export default function ImageUploader({
           style={{ width: "100%", height: "250px" }}
         >
           {image ? (
-            <Badge              
-            variant="outline"
-            className="absolute top-2 right-2 z-10 text-black border-black bg-gray-100 bg-blend-color-dodge bg-opacity-25"
-          >
-            {resolution?.width} x {resolution?.height}
-          </Badge>            
+            <Badge
+              variant="outline"
+              className="absolute top-2 right-2 z-10 text-black border-black bg-gray-100 bg-blend-color-dodge bg-opacity-25"
+            >
+              {matrice ? matrice[0].length : null} x{" "}
+              {matrice ? matrice.length : null}
+            </Badge>
           ) : null}
 
           {image ? (

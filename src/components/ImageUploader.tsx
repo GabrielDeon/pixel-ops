@@ -20,6 +20,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MatrixOperationsCard from "./matrix-operations-card";
 import { getImageMatrice } from "@/imageUtils/transformations";
+import  CanvasComponent from "@/components/CanvasComponent";
 
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 
@@ -41,11 +42,11 @@ export default function ImageUploader({
   >("contain");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);  
 
   const getPixelMatrix = useCallback(
     (img: HTMLImageElement) => {
-      const canvas = canvasRef.current;
+      const canvas = canvasRef.current;      
       if (!canvas) return;
 
       canvas.width = img.width;
@@ -98,11 +99,12 @@ export default function ImageUploader({
                   <DrawerTitle></DrawerTitle>
                 </DrawerHeader>
                 <div className="flex flex-row space-x-4 justify-center items-stretch">
-                  <img
+                  <CanvasComponent matrice={matrice}/>
+                  {/* <img
                     src={image}
                     alt="Uploaded preview"
                     className="w-1/2 h-64 object-fill rounded-md border-solid border-2"
-                  />
+                  /> */}
                   <MatrixOperationsCard className="w-1/2 h-64" />
                 </div>
                 <DrawerFooter className="flex flex-col items-center mt-6">

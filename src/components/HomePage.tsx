@@ -5,8 +5,7 @@ import { imageMatriceToURL } from "../imageUtils/transformations";
 
 export default function HomePage() {  
   const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(null);    
-  const [pixelMatrix, setPixelMatrix] = useState<{matrixA: number[][][], matrixB: number[][][]} | null>(null);  
-  
+  const [pixelMatrix, setPixelMatrix] = useState<{matrixA: number[][][], matrixB: number[][][]} | null>(null); 
 
   const handleImageProcessed = (matrix: number[][][], mainImage: boolean) => {
     if (mainImage) {
@@ -36,7 +35,7 @@ export default function HomePage() {
             imageUrl={processedImageUrl}
             altText="Processed Image"
           />               
-        </div>
+        </div>        
       </main>
     </>
   );

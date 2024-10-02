@@ -1,3 +1,23 @@
+export interface Operation {
+  type: "Add" | "Subtract" | "Multiply" | "Divide"; // Supported operations
+  value: number; // The value to be used in the operation
+}
+
+export function checkApplyOperation (operation: Operation, value: number) {
+  switch(operation.type) {
+    case "Add":
+      return Math.min(Math.max((value + operation.value), 0), 255);
+    case "Subtract":
+      return Math.min(Math.max((value - operation.value), 0), 255);
+    case "Multiply":
+      return Math.min(Math.max((value * operation.value), 0), 255);
+    case "Divide":
+      return Math.min(Math.max((value / operation.value), 0), 255);
+    default:
+      return value;
+  }
+}
+
 export function imageMatriceToURL(matrix: number[][][]): string {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");

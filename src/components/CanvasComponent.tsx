@@ -1,16 +1,13 @@
 import { useRef, useEffect } from "react";
-import { Operation, checkApplyOperation } from '@/imageUtils/transformations'
-
-
+import { checkApplyOperation } from "@/imageUtils/transformations";
 
 interface CanvasCOmponentProps {
-  matrice: number[][][] | null;
-  operation: Operation | null;
+  matrice: number[][][] | null;    
+  setApply: (bool: boolean)=>void;
 }
 
 const CanvasComponent: React.FC<CanvasCOmponentProps> = ({
-  matrice,
-  operation,
+  matrice, setApply
 }) => {
   const drawerCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -34,28 +31,24 @@ const CanvasComponent: React.FC<CanvasCOmponentProps> = ({
           for (let x = 0; x < width; x++) {
             const pixelIndex = (y * width + x) * 4; // 4 values per pixel (r, g, b, a)
 
-            const [r, g, b, a] = matrice[y][x];
-
-            if (operation) {                
-              imageData.data[pixelIndex] = checkApplyOperation(operation, r);     // Red
-              imageData.data[pixelIndex + 1] = checkApplyOperation(operation, g); // Green
-              imageData.data[pixelIndex + 2] = checkApplyOperation(operation, b); // Blue
-              imageData.data[pixelIndex + 3] = checkApplyOperation(operation, a); // Alpha (fully opaque)
-            } else {
-              imageData.data[pixelIndex] =  r;     // Red
-              imageData.data[pixelIndex + 1] = g; // Green
-              imageData.data[pixelIndex + 2] = b; // Blue
-              imageData.data[pixelIndex + 3] = a; // Alpha (fully opaque)
-            }
+            
+            const [r, g, b] = matrice[y][x];
+            
+            imageData.data[pixelIndex]     = r; // Red
+            imageData.data[pixelIndex + 1] = g; // Green
+            imageData.data[pixelIndex + 2] = b; // Blue
+            imageData.data[pixelIndex + 3] = 255; // Alpha (fully opaque)           
 
             //console.log(`Pixel at (${x}, ${y}): Red: ${r}, Green: ${g}, Blue: ${b}, Alpha: ${a}`);
           }
         }
 
         ctx.putImageData(imageData, 0, 0);
+        console.log("Apply to false");        
+        setApply(false);
       }
     }
-  }, [operation]);
+  }, [matrice, setApply]);
 
   return (
     <canvas

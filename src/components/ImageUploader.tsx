@@ -19,8 +19,10 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MatrixOperationsCard from "./matrix-operations-card";
 import { getImageMatrice } from "@/imageUtils/transformations";
-import  CanvasComponent from "@/components/CanvasComponent";
+import CanvasComponent from "@/components/CanvasComponent";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
+import { Operation } from "@/imageUtils/transformations";
+import { checkApplyOperation } from "@/imageUtils/transformations";
 
 interface ImageUploaderProps {
   onImageProcessed: (pixelMatrix: number[][][], mainImage: boolean) => void;
@@ -34,17 +36,22 @@ export default function ImageUploader({
   const [image, setImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [matrice, setMatrice] = useState<number[][][] | null>(null);
+  const [apply, setApply] = useState<boolean>(false);
+  const [operation, setOperation] = useState<Operation | null>({
+    type: "Add",
+    value: 0,
+  });
 
   const [objectFit, setObjectFit] = useState<
     "contain" | "cover" | "fill" | "none"
   >("contain");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);  
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const getPixelMatrix = useCallback(
     (img: HTMLImageElement) => {
-      const canvas = canvasRef.current;      
+      const canvas = canvasRef.current;
       if (!canvas) return;
 
       canvas.width = img.width;
@@ -79,6 +86,34 @@ export default function ImageUploader({
     }
   };
 
+  const handleApply = () => {
+    console.log("Apply to true");
+    if (matrice && operation) {
+      const updatedMatrice = matrice.map(row =>
+        row.map(pixel => {
+          return pixel.map((value) => {
+            return checkApplyOperation(operation, value);
+          });
+        })
+      );
+      setMatrice(updatedMatrice);
+    }
+    setApply(true);
+  };
+
+  const handleReset = () => {
+    const img = new Image();
+    img.src = image || "";
+    setMatrice(getImageMatrice(img) || null);
+  };
+
+  const handleDrawerClose = () => {
+    const img = new Image();
+    img.src = image || "";
+    setMatrice(getImageMatrice(img) || null);
+    setOperation({ type: "Add", value: 0 });    
+  }
+
   const handleButtonClick = () => {
     fileInputRef.current?.click();
   };
@@ -97,16 +132,31 @@ export default function ImageUploader({
                   <DrawerTitle></DrawerTitle>
                 </DrawerHeader>
                 <div className="flex flex-row space-x-4 justify-center items-stretch">
-                  <CanvasComponent matrice={matrice} operation={null}/>                  
-                  <MatrixOperationsCard className="w-1/2 h-64"/>
+                  <CanvasComponent
+                    matrice={matrice}                    
+                    setApply={setApply}
+                  />
+                  <MatrixOperationsCard
+                    operation={operation}
+                    setOperation={setOperation}                    
+                  />
                 </div>
                 <DrawerFooter className="flex flex-col items-center mt-6">
                   <div className="flex space-x-4 w-full justify-between">
-                    <Button className="flex-1">Reset</Button>
-                    <Button className="flex-1">Download</Button>
-                    <Button className="flex-1">Apply</Button>
+                    <Button className="flex-1" onClick={handleReset}>
+                      Reset
+                    </Button>
+                    <Button className="flex-1" onClick={()=>{console.log(apply);
+                    }}>Download</Button>
+                    <Button className="flex-1" onClick={handleApply}>
+                      Apply
+                    </Button>
                     <DrawerClose asChild>
-                      <Button variant="outline" className="flex-1">
+                      <Button
+                        onClick={handleDrawerClose}
+                        variant="outline"
+                        className="flex-1"
+                      >
                         Close
                       </Button>
                     </DrawerClose>

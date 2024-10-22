@@ -1,5 +1,4 @@
 import { useRef, useEffect } from "react";
-import { checkApplyOperation } from "@/imageUtils/transformations";
 
 interface CanvasCOmponentProps {
   matrice: number[][][] | null;    
@@ -39,7 +38,7 @@ const CanvasComponent: React.FC<CanvasCOmponentProps> = ({
             imageData.data[pixelIndex + 2] = b; // Blue
             imageData.data[pixelIndex + 3] = 255; // Alpha (fully opaque)           
 
-            //console.log(`Pixel at (${x}, ${y}): Red: ${r}, Green: ${g}, Blue: ${b}, Alpha: ${a}`);
+            //console.log(`Pixel at (${x}, ${y}): Red: ${r}, Green: ${g}, Blue: ${b}`);
           }
         }
 

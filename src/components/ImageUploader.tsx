@@ -18,7 +18,7 @@ import {
 } from "./ui/drawer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MatrixOperationsCard from "./matrix-operations-card";
-import { getImageMatrice } from "@/imageUtils/transformations";
+import { getImageMatrice, imageMatriceToURL } from "@/imageUtils/transformations";
 import CanvasComponent from "@/components/CanvasComponent";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import { Operation } from "@/imageUtils/transformations";
@@ -118,6 +118,19 @@ export default function ImageUploader({
     fileInputRef.current?.click();
   };
 
+  const handleDownload = () => {
+    let downloadURL;
+    if(matrice){
+      downloadURL = imageMatriceToURL(matrice);
+      const link = document.createElement("a");
+      link.href = downloadURL;
+      link.download = "processed-image.png"; // You can customize the filename here
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }    
+  }
+
   return (
     <Card className="w-72 h-max flex flex-col">
       <div className="p-2 border-b relative">
@@ -146,8 +159,7 @@ export default function ImageUploader({
                     <Button className="flex-1" onClick={handleReset}>
                       Reset
                     </Button>
-                    <Button className="flex-1" onClick={()=>{console.log(apply);
-                    }}>Download</Button>
+                    <Button className="flex-1" onClick={handleDownload}>Download</Button>
                     <Button className="flex-1" onClick={handleApply}>
                       Apply
                     </Button>

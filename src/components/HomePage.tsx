@@ -2,6 +2,7 @@ import ImageUploader from "./ImageUploader";
 import ImageDownloader from "./ImageDownloader";
 import { useState, useEffect } from "react";
 import { imageMatriceToURL } from "../imageUtils/transformations";
+import ControlPanel from "./control-panel";
 
 export default function HomePage() {  
   const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(null);    
@@ -27,10 +28,10 @@ export default function HomePage() {
   return (
     <>
       <main className="flex flex-col flex-1">
-        <div className="flex flex-row gap-4 mt-5 ml-10 justify-start">
+        <div className="flex flex-row gap-4 mt-5 ml-24 mr-24 justify-start">
           <ImageUploader onImageProcessed={handleImageProcessed} mainImage={true}/>
           <ImageUploader onImageProcessed={handleImageProcessed} mainImage={false}/>
-
+          <ControlPanel/>
           <ImageDownloader
             imageUrl={processedImageUrl}
             altText="Processed Image"

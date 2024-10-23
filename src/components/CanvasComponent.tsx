@@ -1,12 +1,11 @@
 import { useRef, useEffect } from "react";
 
 interface CanvasCOmponentProps {
-  matrice: number[][][] | null;    
-  setApply: (bool: boolean)=>void;
+  matrice: number[][][] | null;      
 }
 
 const CanvasComponent: React.FC<CanvasCOmponentProps> = ({
-  matrice, setApply
+  matrice
 }) => {
   const drawerCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -42,12 +41,10 @@ const CanvasComponent: React.FC<CanvasCOmponentProps> = ({
           }
         }
 
-        ctx.putImageData(imageData, 0, 0);
-        console.log("Apply to false");        
-        setApply(false);
+        ctx.putImageData(imageData, 0, 0);        
       }
     }
-  }, [matrice, setApply]);
+  }, [matrice]);
 
   return (
     <canvas

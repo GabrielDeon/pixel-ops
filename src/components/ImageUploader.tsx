@@ -35,8 +35,7 @@ export default function ImageUploader({
 }: ImageUploaderProps) {
   const [image, setImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [matrice, setMatrice] = useState<number[][][] | null>(null);
-  const [apply, setApply] = useState<boolean>(false);
+  const [matrice, setMatrice] = useState<number[][][] | null>(null);  
   const [operation, setOperation] = useState<Operation | null>({
     type: "Add",
     value: 0,
@@ -97,8 +96,7 @@ export default function ImageUploader({
         })
       );
       setMatrice(updatedMatrice);
-    }
-    setApply(true);
+    }    
   };
 
   const handleReset = () => {
@@ -147,8 +145,7 @@ export default function ImageUploader({
                 </DrawerHeader>
                 <div className="flex flex-row space-x-4 justify-center items-stretch">
                   <CanvasComponent
-                    matrice={matrice}                    
-                    setApply={setApply}
+                    matrice={matrice}                                        
                   />
                   <MatrixOperationsCard
                     operation={operation}

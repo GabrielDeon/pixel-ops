@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -49,20 +49,26 @@ export default function ImageUploader({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const getPixelMatrix = useCallback(
-    (img: HTMLImageElement) => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
+  useEffect(() => {
+    if (image) {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
 
-      canvas.width = img.width;
-      canvas.height = img.height;
+        canvas.width = img.width;
+        canvas.height = img.height;
 
-      setMatrice(getImageMatrice(img) || null);
+        const newMatrice = getImageMatrice(img);
+        setMatrice(newMatrice || null);
 
-      onImageProcessed(matrice || [], mainImage);
-    },
-    [onImageProcessed, matrice, mainImage]
-  );
+        if (newMatrice) {
+          onImageProcessed(newMatrice, mainImage);
+        }
+      };
+      img.src = image;
+    }
+  }, [image, mainImage, onImageProcessed]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -70,12 +76,7 @@ export default function ImageUploader({
       if (file.type.startsWith("image/")) {
         const reader = new FileReader();
         reader.onload = (e) => {
-          const img = new Image();
-          img.onload = () => {
-            setImage(e.target?.result as string);
-            getPixelMatrix(img);
-          };
-          img.src = e.target?.result as string;
+          setImage(e.target?.result as string);
           setError(null);
         };
         reader.readAsDataURL(file);
@@ -86,8 +87,7 @@ export default function ImageUploader({
     }
   };
 
-  const handleApply = () => {
-    console.log("Apply to true");
+  const handleApply = () => {    
     if (matrice && operation) {
       const updatedMatrice = matrice.map(row =>
         row.map(pixel => {
@@ -102,15 +102,17 @@ export default function ImageUploader({
   };
 
   const handleReset = () => {
-    const img = new Image();
-    img.src = image || "";
-    setMatrice(getImageMatrice(img) || null);
+    if (image) {
+      const img = new Image();
+      img.src = image;
+      img.onload = () => {
+        setMatrice(getImageMatrice(img) || null);
+      };
+    }
   };
 
   const handleDrawerClose = () => {
-    const img = new Image();
-    img.src = image || "";
-    setMatrice(getImageMatrice(img) || null);
+    handleReset();
     setOperation({ type: "Add", value: 0 });    
   }
 
@@ -119,12 +121,11 @@ export default function ImageUploader({
   };
 
   const handleDownload = () => {
-    let downloadURL;
     if(matrice){
-      downloadURL = imageMatriceToURL(matrice);
+      const downloadURL = imageMatriceToURL(matrice);
       const link = document.createElement("a");
       link.href = downloadURL;
-      link.download = "processed-image.png"; // You can customize the filename here
+      link.download = "processed-image.png";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

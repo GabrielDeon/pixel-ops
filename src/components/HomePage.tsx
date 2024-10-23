@@ -1,6 +1,6 @@
 import ImageUploader from "./ImageUploader";
 import ImageDownloader from "./ImageDownloader";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { imageMatriceToURL } from "../imageUtils/transformations";
 import ControlPanel from "./control-panel";
 import { addImages } from "@/imageUtils/composite";
@@ -41,13 +41,6 @@ export default function HomePage() {
     }
   };
 
-  useEffect(() => {
-    if (pixelMatrix.matrixA.length) {
-      const processedImageUrl = imageMatriceToURL(pixelMatrix.matrixA);
-      //setProcessedImageUrl(processedImageUrl);
-    }
-  }, [pixelMatrix.matrixA]);
-
   return (
     <main className="flex flex-col flex-1">
       <div className="flex flex-row gap-4 mt-5 ml-24 mr-24 justify-start">
@@ -68,9 +61,7 @@ export default function HomePage() {
         <ImageDownloader
           imageUrl={processedImageUrl}
           altText="Processed Image"
-        />
-        <button onClick={()=>{console.log(pixelMatrix.matrixA.length);
-        }}>INFO</button>
+        />        
       </div>
     </main>
   );

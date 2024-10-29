@@ -58,6 +58,7 @@ export default function ControlPanel({
                 <SelectItem value="none">None</SelectItem>
                 <SelectItem value="add">Add</SelectItem>
                 <SelectItem value="subtract">Subtract</SelectItem>
+                <SelectItem value="difference">Difference</SelectItem>
               </SelectContent>
             </Select>
           </div>

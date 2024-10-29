@@ -4,6 +4,7 @@ import ControlPanel from "./control-panel";
 import { useState } from "react";
 import { imageMatriceToURL } from "../imageUtils/transformations";
 import { addImages, subtractImages } from "@/imageUtils/composite";
+import { flipMatrixHorizontally, flipMatrixVertically, matrixToGrayscale } from "@/imageUtils/filters";
 
 export default function HomePage() {
   const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(null);
@@ -11,7 +12,7 @@ export default function HomePage() {
     matrixA: number[][][];
     matrixB: number[][][];
   }>({ matrixA: [], matrixB: [] });
-  
+
   const [imageConfig, setImageConfig] = useState<{
     arithmeticOperation: string;
     conversionType: string;
@@ -35,7 +36,7 @@ export default function HomePage() {
     value: string,
     configuration: ImageVariable
   ) => {
-    switch(configuration){
+    switch (configuration) {
       case ImageVariable.ARITHMETIC_OPERATION:
         setImageConfig(prevConfig => ({
           ...prevConfig,
@@ -58,22 +59,44 @@ export default function HomePage() {
   };
 
   const handleApply = () => {
-    if (pixelMatrix.matrixA.length && pixelMatrix.matrixB.length) {
-      let processedImageUrl: string | null = null;
-      let matrixResultant: number[][][];
-      switch (true) {
-        case (imageConfig.arithmeticOperation === "Add"):
-          matrixResultant = addImages(pixelMatrix.matrixA, pixelMatrix.matrixB);
-          processedImageUrl = imageMatriceToURL(matrixResultant);
-          break;
-        case (imageConfig.arithmeticOperation === "Subtract"):
-          matrixResultant = subtractImages(pixelMatrix.matrixA, pixelMatrix.matrixB);
-          processedImageUrl = imageMatriceToURL(matrixResultant);
+    let processedImageUrl: string | null = null;
+    if (pixelMatrix.matrixA.length) {
+      let matrixResultant: number[][][] = pixelMatrix.matrixA;
+
+      //Check if has two inputs
+      if (pixelMatrix.matrixB.length) {
+        switch (imageConfig.arithmeticOperation) {
+          case "add":
+            matrixResultant = addImages(pixelMatrix.matrixA, pixelMatrix.matrixB);
+            break;
+          case "subtract":
+            matrixResultant = subtractImages(pixelMatrix.matrixA, pixelMatrix.matrixB);
+            break;
+          case "difference":
+            matrixResultant = addImages(subtractImages(pixelMatrix.matrixA, pixelMatrix.matrixB), subtractImages(pixelMatrix.matrixB, pixelMatrix.matrixA));
+            break;
+        }
+      }
+
+      switch (imageConfig.conversionType) {
+        case "grayscale":
+          matrixResultant = matrixToGrayscale(matrixResultant)
           break;
       }
-      setProcessedImageUrl(processedImageUrl);
+      switch (imageConfig.orientation) {
+        case "flip-horizontal":
+          matrixResultant = flipMatrixHorizontally(matrixResultant);
+          break;
+        case "flip-vertical":
+          matrixResultant = flipMatrixVertically(matrixResultant);
+          break;
+      }
+
+      processedImageUrl = imageMatriceToURL(matrixResultant);
     }
-  };
+    setProcessedImageUrl(processedImageUrl);
+  }
+
 
   return (
     <main className="flex flex-col flex-1">
@@ -96,7 +119,6 @@ export default function HomePage() {
           altText="Processed Image"
         />
       </div>
-      <button onClick={() => alert(`Arithmetic Operation: ${imageConfig.arithmeticOperation} \n Conversion Type: ${imageConfig.conversionType} \n Image Orientation: ${imageConfig.orientation}`)}>INFO</button>
     </main>
   );
 }

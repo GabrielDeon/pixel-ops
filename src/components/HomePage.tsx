@@ -1,9 +1,9 @@
 import ImageUploader from "./ImageUploader";
 import ImageDownloader from "./ImageDownloader";
+import ControlPanel from "./control-panel";
 import { useState } from "react";
 import { imageMatriceToURL } from "../imageUtils/transformations";
-import ControlPanel from "./control-panel";
-import { addImages } from "@/imageUtils/composite";
+import { addImages, subtractImages } from "@/imageUtils/composite";
 
 export default function HomePage() {
   const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(null);
@@ -11,10 +11,12 @@ export default function HomePage() {
     matrixA: number[][][];
     matrixB: number[][][];
   }>({ matrixA: [], matrixB: [] });
+  
   const [imageConfig, setImageConfig] = useState<{
     arithmeticOperation: string;
+    conversionType: string;
     orientation: string;
-  }>({ arithmeticOperation: "add", orientation: "normal" });
+  }>({ arithmeticOperation: "none", orientation: "normal", conversionType: "none" });
 
   const handleImageProcessed = (matrix: number[][][], mainImage: boolean) => {
     setPixelMatrix(prevMatrix => ({
@@ -23,20 +25,52 @@ export default function HomePage() {
     }));
   };
 
+  enum ImageVariable {
+    ARITHMETIC_OPERATION,
+    CONVERSION_TYPE,
+    ORIENTATION
+  }
+
   const handleImageConfiguration = (
-    arithmeticOperation: string,
-    orientation: string
+    value: string,
+    configuration: ImageVariable
   ) => {
-    setImageConfig({
-      arithmeticOperation,
-      orientation,
-    });
+    switch(configuration){
+      case ImageVariable.ARITHMETIC_OPERATION:
+        setImageConfig(prevConfig => ({
+          ...prevConfig,
+          arithmeticOperation: value
+        }));
+        break;
+      case ImageVariable.CONVERSION_TYPE:
+        setImageConfig(prevConfig => ({
+          ...prevConfig,
+          conversionType: value
+        }));
+        break;
+      case ImageVariable.ORIENTATION:
+        setImageConfig(prevConfig => ({
+          ...prevConfig,
+          orientation: value
+        }));
+        break;
+    }
   };
 
   const handleApply = () => {
     if (pixelMatrix.matrixA.length && pixelMatrix.matrixB.length) {
-      const matrixResultant = addImages(pixelMatrix.matrixA, pixelMatrix.matrixB);
-      const processedImageUrl = imageMatriceToURL(matrixResultant);
+      let processedImageUrl: string | null = null;
+      let matrixResultant: number[][][];
+      switch (true) {
+        case (imageConfig.arithmeticOperation === "Add"):
+          matrixResultant = addImages(pixelMatrix.matrixA, pixelMatrix.matrixB);
+          processedImageUrl = imageMatriceToURL(matrixResultant);
+          break;
+        case (imageConfig.arithmeticOperation === "Subtract"):
+          matrixResultant = subtractImages(pixelMatrix.matrixA, pixelMatrix.matrixB);
+          processedImageUrl = imageMatriceToURL(matrixResultant);
+          break;
+      }
       setProcessedImageUrl(processedImageUrl);
     }
   };
@@ -53,16 +87,16 @@ export default function HomePage() {
           mainImage={false}
         />
         <ControlPanel
+          imageConfig={imageConfig}
           onImageConfiguration={handleImageConfiguration}
-          arithmeticOperation={imageConfig.arithmeticOperation}
-          orientation={imageConfig.orientation}
           onApply={handleApply}
         />
         <ImageDownloader
           imageUrl={processedImageUrl}
           altText="Processed Image"
-        />        
+        />
       </div>
+      <button onClick={() => alert(`Arithmetic Operation: ${imageConfig.arithmeticOperation} \n Conversion Type: ${imageConfig.conversionType} \n Image Orientation: ${imageConfig.orientation}`)}>INFO</button>
     </main>
   );
 }

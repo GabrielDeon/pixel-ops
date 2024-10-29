@@ -11,32 +11,30 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 
 interface ControlPanelProps {
+  imageConfig: {
+    arithmeticOperation: string;
+    orientation: string;
+    conversionType: string;
+  };
   onImageConfiguration: (
-    arithmeticOperation: string,
-    orientation: string
+    value: string,
+    configuration: ImageVariable
   ) => void;
 
   onApply: () => void;
+}
 
-  orientation: string;
-  arithmeticOperation: string;
+enum ImageVariable {
+  ARITHMETIC_OPERATION,
+  CONVERSION_TYPE,
+  ORIENTATION
 }
 
 export default function ControlPanel({
+  imageConfig,
   onImageConfiguration,
-  arithmeticOperation,
-  orientation,
   onApply
 }: ControlPanelProps) {
-  const handleArithmeticOperationChange = (value: string) => {
-    // Convert the select value to match the prop value
-    const operation = value === "add" ? "Add" : "Subtract";
-    onImageConfiguration(operation, orientation);
-  };
-
-  const handleOrientationChange = (value: string) => {
-    onImageConfiguration(arithmeticOperation, value);
-  };
 
   return (
     <Card className="flex-1 flex flex-col h-[413px]">
@@ -50,13 +48,14 @@ export default function ControlPanel({
           <div>
             <Label htmlFor="arithmetic-operation">Arithmetic Operation</Label>
             <Select
-              value={arithmeticOperation.toLowerCase()}
-              onValueChange={handleArithmeticOperationChange}
+              value={imageConfig.arithmeticOperation}
+              onValueChange={(value) => onImageConfiguration(value, ImageVariable.ARITHMETIC_OPERATION)}
             >
               <SelectTrigger id="arithmetic-operation">
                 <SelectValue placeholder="Select operation" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">None</SelectItem>
                 <SelectItem value="add">Add</SelectItem>
                 <SelectItem value="subtract">Subtract</SelectItem>
               </SelectContent>
@@ -65,14 +64,14 @@ export default function ControlPanel({
 
           <div>
             <Label htmlFor="conversion-type">Conversion Type</Label>
-            <Select>
+            <Select value={imageConfig.conversionType} onValueChange={(value) => onImageConfiguration(value, ImageVariable.CONVERSION_TYPE)}>
               <SelectTrigger id="conversion-type">
                 <SelectValue placeholder="Select conversion" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">None</SelectItem>
                 <SelectItem value="grayscale">Grayscale</SelectItem>
                 <SelectItem value="sepia">Sepia</SelectItem>
-                <SelectItem value="invert">Invert</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -80,8 +79,8 @@ export default function ControlPanel({
           <div className="col-span-2">
             <Label>Orientation</Label>
             <RadioGroup
-              value={orientation.toLowerCase()}
-              onValueChange={handleOrientationChange}
+              value={imageConfig.orientation}
+              onValueChange={(value) => onImageConfiguration(value, ImageVariable.ORIENTATION)}
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="normal" id="normal" />

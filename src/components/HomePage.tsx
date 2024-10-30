@@ -3,11 +3,26 @@ import ImageDownloader from "./ImageDownloader";
 import ControlPanel from "./control-panel";
 import { useState } from "react";
 import { imageMatriceToURL } from "../imageUtils/transformations";
-import { addImages, subtractImages } from "@/imageUtils/composite";
-import { flipMatrixHorizontally, flipMatrixVertically, matrixToGrayscale } from "@/imageUtils/filters";
+import {
+  addImages,
+  linearCombinationBlend,
+  linearCombinationAverage,
+  subtractImages,
+  andOperation,
+  notOperation,
+  orOperation,
+  xorOperation,
+} from "@/imageUtils/composite";
+import {
+  flipMatrixHorizontally,
+  flipMatrixVertically,
+  matrixToGrayscale,
+} from "@/imageUtils/filters";
 
 export default function HomePage() {
-  const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(null);
+  const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(
+    null
+  );
   const [pixelMatrix, setPixelMatrix] = useState<{
     matrixA: number[][][];
     matrixB: number[][][];
@@ -17,19 +32,26 @@ export default function HomePage() {
     arithmeticOperation: string;
     conversionType: string;
     orientation: string;
-  }>({ arithmeticOperation: "none", orientation: "normal", conversionType: "none" });
+    logicalOp: string;
+  }>({
+    arithmeticOperation: "none",
+    orientation: "normal",
+    conversionType: "none",
+    logicalOp: "none",
+  });
 
   const handleImageProcessed = (matrix: number[][][], mainImage: boolean) => {
-    setPixelMatrix(prevMatrix => ({
+    setPixelMatrix((prevMatrix) => ({
       ...prevMatrix,
-      [mainImage ? 'matrixA' : 'matrixB']: matrix
+      [mainImage ? "matrixA" : "matrixB"]: matrix,
     }));
   };
 
   enum ImageVariable {
     ARITHMETIC_OPERATION,
     CONVERSION_TYPE,
-    ORIENTATION
+    ORIENTATION,
+    LOGICAL_OPS,
   }
 
   const handleImageConfiguration = (
@@ -38,21 +60,29 @@ export default function HomePage() {
   ) => {
     switch (configuration) {
       case ImageVariable.ARITHMETIC_OPERATION:
-        setImageConfig(prevConfig => ({
+        setImageConfig((prevConfig) => ({
           ...prevConfig,
-          arithmeticOperation: value
+          logicalOp: "none",
+          arithmeticOperation: value,
         }));
         break;
       case ImageVariable.CONVERSION_TYPE:
-        setImageConfig(prevConfig => ({
+        setImageConfig((prevConfig) => ({
           ...prevConfig,
-          conversionType: value
+          conversionType: value,
         }));
         break;
       case ImageVariable.ORIENTATION:
-        setImageConfig(prevConfig => ({
+        setImageConfig((prevConfig) => ({
           ...prevConfig,
-          orientation: value
+          orientation: value,
+        }));
+        break;
+      case ImageVariable.LOGICAL_OPS:
+        setImageConfig((prevConfig) => ({
+          ...prevConfig,
+          arithmeticOperation: "none",
+          logicalOp: value,
         }));
         break;
     }
@@ -65,22 +95,67 @@ export default function HomePage() {
 
       //Check if has two inputs
       if (pixelMatrix.matrixB.length) {
+        switch (imageConfig.logicalOp) {
+          case "and":
+            matrixResultant = andOperation(
+              pixelMatrix.matrixA,
+              pixelMatrix.matrixB
+            );
+            break;
+          case "or":
+            matrixResultant = orOperation(
+              pixelMatrix.matrixA,
+              pixelMatrix.matrixB
+            );
+            break;
+          case "xor":
+            matrixResultant = xorOperation(
+              pixelMatrix.matrixA,
+              pixelMatrix.matrixB
+            );
+            break;
+          case "not":
+            matrixResultant = notOperation(pixelMatrix.matrixA);
+            break;
+        }
+
         switch (imageConfig.arithmeticOperation) {
           case "add":
-            matrixResultant = addImages(pixelMatrix.matrixA, pixelMatrix.matrixB);
+            matrixResultant = addImages(
+              pixelMatrix.matrixA,
+              pixelMatrix.matrixB
+            );
             break;
           case "subtract":
-            matrixResultant = subtractImages(pixelMatrix.matrixA, pixelMatrix.matrixB);
+            matrixResultant = subtractImages(
+              pixelMatrix.matrixA,
+              pixelMatrix.matrixB
+            );
             break;
           case "difference":
-            matrixResultant = addImages(subtractImages(pixelMatrix.matrixA, pixelMatrix.matrixB), subtractImages(pixelMatrix.matrixB, pixelMatrix.matrixA));
+            matrixResultant = addImages(
+              subtractImages(pixelMatrix.matrixA, pixelMatrix.matrixB),
+              subtractImages(pixelMatrix.matrixB, pixelMatrix.matrixA)
+            );
+            break;
+          case "blending":
+            matrixResultant = linearCombinationBlend(
+              pixelMatrix.matrixA,
+              pixelMatrix.matrixB,
+              0.3
+            );
+            break;
+          case "linearCombination":
+            matrixResultant = linearCombinationAverage(
+              pixelMatrix.matrixA,
+              pixelMatrix.matrixB
+            );
             break;
         }
       }
-
       switch (imageConfig.conversionType) {
         case "grayscale":
-          matrixResultant = matrixToGrayscale(matrixResultant)
+          matrixResultant = matrixToGrayscale(matrixResultant);
           break;
       }
       switch (imageConfig.orientation) {
@@ -95,8 +170,7 @@ export default function HomePage() {
       processedImageUrl = imageMatriceToURL(matrixResultant);
     }
     setProcessedImageUrl(processedImageUrl);
-  }
-
+  };
 
   return (
     <main className="flex flex-col flex-1">

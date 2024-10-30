@@ -15,11 +15,9 @@ interface ControlPanelProps {
     arithmeticOperation: string;
     orientation: string;
     conversionType: string;
+    logicalOp: string;
   };
-  onImageConfiguration: (
-    value: string,
-    configuration: ImageVariable
-  ) => void;
+  onImageConfiguration: (value: string, configuration: ImageVariable) => void;
 
   onApply: () => void;
 }
@@ -27,15 +25,15 @@ interface ControlPanelProps {
 enum ImageVariable {
   ARITHMETIC_OPERATION,
   CONVERSION_TYPE,
-  ORIENTATION
+  ORIENTATION,
+  LOGICAL_OPS
 }
 
 export default function ControlPanel({
   imageConfig,
   onImageConfiguration,
-  onApply
+  onApply,
 }: ControlPanelProps) {
-
   return (
     <Card className="flex-1 flex flex-col h-[413px]">
       {" "}
@@ -49,7 +47,9 @@ export default function ControlPanel({
             <Label htmlFor="arithmetic-operation">Arithmetic Operation</Label>
             <Select
               value={imageConfig.arithmeticOperation}
-              onValueChange={(value) => onImageConfiguration(value, ImageVariable.ARITHMETIC_OPERATION)}
+              onValueChange={(value) => 
+                onImageConfiguration(value, ImageVariable.ARITHMETIC_OPERATION)
+              }
             >
               <SelectTrigger id="arithmetic-operation">
                 <SelectValue placeholder="Select operation" />
@@ -59,13 +59,22 @@ export default function ControlPanel({
                 <SelectItem value="add">Add</SelectItem>
                 <SelectItem value="subtract">Subtract</SelectItem>
                 <SelectItem value="difference">Difference</SelectItem>
+                <SelectItem value="blending">Blending 70%</SelectItem>
+                <SelectItem value="linearCombination">
+                  Linear Combination
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div>
             <Label htmlFor="conversion-type">Conversion Type</Label>
-            <Select value={imageConfig.conversionType} onValueChange={(value) => onImageConfiguration(value, ImageVariable.CONVERSION_TYPE)}>
+            <Select
+              value={imageConfig.conversionType}
+              onValueChange={(value) =>
+                onImageConfiguration(value, ImageVariable.CONVERSION_TYPE)
+              }
+            >
               <SelectTrigger id="conversion-type">
                 <SelectValue placeholder="Select conversion" />
               </SelectTrigger>
@@ -77,11 +86,35 @@ export default function ControlPanel({
             </Select>
           </div>
 
-          <div className="col-span-2">
+          <div>
+            <Label htmlFor="conversion-type">Logical Operations</Label>
+            <Select
+              value={imageConfig.logicalOp}
+              onValueChange={(value) =>
+                onImageConfiguration(value, ImageVariable.LOGICAL_OPS)
+              }
+            >
+              <SelectTrigger id="logical-operations">
+                <SelectValue placeholder="Select Logical Operation" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="and">And</SelectItem>
+                <SelectItem value="not">Not</SelectItem>
+                <SelectItem value="or">Or</SelectItem>
+                <SelectItem value="xor">Xor</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="row-span-2">
             <Label>Orientation</Label>
             <RadioGroup
               value={imageConfig.orientation}
-              onValueChange={(value) => onImageConfiguration(value, ImageVariable.ORIENTATION)}
+              onValueChange={(value) =>
+                onImageConfiguration(value, ImageVariable.ORIENTATION)
+              }
+              className="flex items-center mt-3"
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="normal" id="normal" />

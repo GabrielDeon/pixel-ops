@@ -74,3 +74,50 @@ export function getImageMatrice(
   }
   return pixelMatrix;
 }
+
+export function getGrayscaleHistogram(matrix: number[][][]): number[] {
+  const histogram = Array(256).fill(0);
+
+  for (const row of matrix) {
+    for (const pixel of row) {
+      const [r, g, b] = pixel;
+      const intensity = Math.round((r + g + b) / 3);
+      histogram[intensity]++;
+    }
+  }
+
+  return histogram;
+}
+
+export function equalizeGrayscaleHistogram(matrix: number[][][]): number[][][] {
+  // Step 1: Get the grayscale histogram
+  const histogram = getGrayscaleHistogram(matrix);
+
+  // Step 2: Calculate the cumulative distribution function (CDF)
+  const cdf = Array(256).fill(0);
+  cdf[0] = histogram[0];
+  for (let i = 1; i < 256; i++) {
+    cdf[i] = cdf[i - 1] + histogram[i];
+  }
+
+  // Step 3: Normalize the CDF to map intensities
+  const numPixels = matrix.length * matrix[0].length;
+  const cdfMin = cdf.find((value) => value > 0);
+  const equalizationMap = Array(256).fill(0);
+  
+  for (let i = 0; i < 256; i++) {
+    equalizationMap[i] = Math.round(((cdf[i] - cdfMin) / (numPixels - cdfMin)) * 255);
+  }
+
+  // Step 4: Apply equalization to each pixel in the matrix
+  const equalizedMatrix = matrix.map(row =>
+    row.map(pixel => {
+      const [r, g, b, a = 255] = pixel;
+      const intensity = Math.round((r + g + b) / 3);
+      const newIntensity = equalizationMap[intensity];
+      return [newIntensity, newIntensity, newIntensity, a]; 
+    })
+  );
+
+  return equalizedMatrix;
+}

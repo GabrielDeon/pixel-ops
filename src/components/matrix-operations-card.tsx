@@ -40,7 +40,7 @@ export default function MatrixOperationsCard({
       className={`w-1/2 h-64 flex flex-col justify-between border-solid border-2`}
     >
       <CardHeader>
-        <CardTitle>Matrix Operations</CardTitle>
+        <CardTitle>Brightness</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">

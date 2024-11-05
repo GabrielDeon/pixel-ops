@@ -18,6 +18,7 @@ import {
   flipMatrixVertically,
   matrixToGrayscale,
 } from "@/imageUtils/filters";
+import { HistogramChart } from "./HistogramChart";
 
 export default function HomePage() {
   const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(
@@ -27,6 +28,8 @@ export default function HomePage() {
     matrixA: number[][][];
     matrixB: number[][][];
   }>({ matrixA: [], matrixB: [] });
+
+  const [resultantMatrix, setResultantMatrix] = useState<number[][][]>([]);
 
   const [imageConfig, setImageConfig] = useState<{
     arithmeticOperation: string;
@@ -114,9 +117,6 @@ export default function HomePage() {
               pixelMatrix.matrixB
             );
             break;
-          case "not":
-            matrixResultant = notOperation(pixelMatrix.matrixA);
-            break;
         }
 
         switch (imageConfig.arithmeticOperation) {
@@ -153,6 +153,10 @@ export default function HomePage() {
             break;
         }
       }
+      if (imageConfig.logicalOp === "not") {
+        matrixResultant = notOperation(pixelMatrix.matrixA);
+      }
+
       switch (imageConfig.conversionType) {
         case "grayscale":
           matrixResultant = matrixToGrayscale(matrixResultant);
@@ -167,6 +171,7 @@ export default function HomePage() {
           break;
       }
 
+      setResultantMatrix(matrixResultant);
       processedImageUrl = imageMatriceToURL(matrixResultant);
     }
     setProcessedImageUrl(processedImageUrl);
@@ -192,6 +197,17 @@ export default function HomePage() {
           imageUrl={processedImageUrl}
           altText="Processed Image"
         />
+      </div>
+      <div id="bottomControl" className="flex flex-row justify-center gap-4 mt-5 ml-24 mr-24 ">
+        <div className="w-96 h-80">
+          <HistogramChart title="Input 1" matrix={pixelMatrix.matrixA} />
+        </div>
+        <div className="w-96 h-80">
+          <HistogramChart title="Input 2" matrix={pixelMatrix.matrixB} />
+        </div>
+        <div className="w-96 h-80">
+          <HistogramChart title="Result" matrix={resultantMatrix} />
+        </div>
       </div>
     </main>
   );

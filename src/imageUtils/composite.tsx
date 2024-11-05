@@ -127,15 +127,34 @@ export function orOperation(matrixA: number[][][], matrixB: number[][][]): numbe
   );
 }
 
-export function xorOperation(matrixA: number[][][], matrixB: number[][][]): number[][][] {
-  return matrixA.map((row, y) =>
-    row.map((pixel, x) => pixel.map((value, i) => value ^ matrixB[y][x][i]))
-  );
+export function xorOperation(matrix1: number[][][], matrix2: number[][][]): number[][][] {
+  const finalMatrix: number[][][] = [];
+
+  for (let y = 0; y < matrix1.length; y++) {
+    const row: number[][] = [];
+    for (let x = 0; x < matrix1[0].length; x++) {
+      const [r1, g1, b1, a1] = matrix1[y][x];
+      const [r2, g2, b2, a2] = matrix2[y][x];
+
+      // Perform XOR on each RGB channel
+      row.push([r1 ^ r2, g1 ^ g2, b1 ^ b2, Math.min(a1, a2)]);  
+    }
+    finalMatrix.push(row);
+  }
+
+  return finalMatrix;
 }
 
 export function notOperation(matrix: number[][][]): number[][][] {
-  return matrix.map(row =>
-    row.map(pixel => pixel.map(value => ~value & 0xff))
-  );
-}
+  const finalMatrix: number[][][] = [];
+  for (let y = 0; y < matrix.length; y++) {
+    const row: number[][] = [];
+    for (let x = 0; x < matrix[0].length; x++) {
+      const [r, g, b, a] = matrix[y][x];
+      row.push([255 - r, 255 - g, 255 - b, a]);  
+    }
+    finalMatrix.push(row);
+  }
 
+  return finalMatrix;
+}

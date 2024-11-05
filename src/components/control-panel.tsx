@@ -9,6 +9,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch"
+
 
 interface ControlPanelProps {
   imageConfig: {
@@ -47,7 +49,7 @@ export default function ControlPanel({
             <Label htmlFor="arithmetic-operation">Arithmetic Operation</Label>
             <Select
               value={imageConfig.arithmeticOperation}
-              onValueChange={(value) => 
+              onValueChange={(value) =>
                 onImageConfiguration(value, ImageVariable.ARITHMETIC_OPERATION)
               }
             >
@@ -130,12 +132,12 @@ export default function ControlPanel({
               </div>
             </RadioGroup>
           </div>
+          <div className="flex items-center space-x-2 mt-2">
+            <Switch id="histogram-equalization" />
+            <Label htmlFor="histogram-equalization">Histogram Equalization</Label>
+          </div>          
         </div>
-
-        {/* Additional space for other fields */}
-        <div className="flex-grow bg-muted rounded-md flex items-center justify-center text-sm text-muted-foreground">
-          Space for additional fields
-        </div>
+        
 
         {/* Apply button */}
         <div className="mt-4 flex justify-end">

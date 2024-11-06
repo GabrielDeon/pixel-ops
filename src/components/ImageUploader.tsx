@@ -59,11 +59,7 @@ export default function ImageUploader({
         canvas.height = img.height;
 
         const newMatrice = getImageMatrice(img);
-        setMatrice(newMatrice || null);
-
-        if (newMatrice) {
-          onImageProcessed(newMatrice, mainImage);
-        }
+        setMatrice(newMatrice || null);        
       };
       img.src = image;
     }

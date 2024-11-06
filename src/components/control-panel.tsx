@@ -76,7 +76,7 @@ export default function ControlPanel({
           </div>
 
           <div>
-            <Label htmlFor="conversion-type">Conversion Type</Label>
+            <Label htmlFor="conversion-type">Filters</Label>
             <Select
               value={imageConfig.conversionType}
               onValueChange={(value) =>
@@ -89,7 +89,9 @@ export default function ControlPanel({
               <SelectContent>
                 <SelectItem value="none">None</SelectItem>
                 <SelectItem value="grayscale">Grayscale</SelectItem>
-                <SelectItem value="sepia">Sepia</SelectItem>
+                <SelectItem value="min">Min</SelectItem>
+                <SelectItem value="max">Max</SelectItem>
+                <SelectItem value="mean">Mean</SelectItem>
               </SelectContent>
             </Select>
           </div>

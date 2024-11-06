@@ -9,8 +9,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch"
-
+import { Switch } from "@/components/ui/switch";
 
 interface ControlPanelProps {
   imageConfig: {
@@ -18,8 +17,13 @@ interface ControlPanelProps {
     orientation: string;
     conversionType: string;
     logicalOp: string;
+    histogramEqualization: boolean;
+    binary: boolean;
   };
-  onImageConfiguration: (value: string, configuration: ImageVariable) => void;
+  onImageConfiguration: (
+    value: string | boolean,
+    configuration: ImageVariable
+  ) => void;
 
   onApply: () => void;
 }
@@ -28,7 +32,9 @@ enum ImageVariable {
   ARITHMETIC_OPERATION,
   CONVERSION_TYPE,
   ORIENTATION,
-  LOGICAL_OPS
+  LOGICAL_OPS,
+  HISTOGRAM,
+  BINARY,
 }
 
 export default function ControlPanel({
@@ -70,7 +76,7 @@ export default function ControlPanel({
           </div>
 
           <div>
-            <Label htmlFor="conversion-type">Conversion Type</Label>
+            <Label htmlFor="conversion-type">Filters</Label>
             <Select
               value={imageConfig.conversionType}
               onValueChange={(value) =>
@@ -83,7 +89,9 @@ export default function ControlPanel({
               <SelectContent>
                 <SelectItem value="none">None</SelectItem>
                 <SelectItem value="grayscale">Grayscale</SelectItem>
-                <SelectItem value="sepia">Sepia</SelectItem>
+                <SelectItem value="min">Min</SelectItem>
+                <SelectItem value="max">Max</SelectItem>
+                <SelectItem value="mean">Mean</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -132,12 +140,31 @@ export default function ControlPanel({
               </div>
             </RadioGroup>
           </div>
-          <div className="flex items-center space-x-2 mt-2">
-            <Switch id="histogram-equalization" />
-            <Label htmlFor="histogram-equalization">Histogram Equalization</Label>
+          <div className="flex items-center space-x-2 mt-2 gap-1">
+            <div className="flex items-center space-x-2 mt-2 ">
+              <Switch
+                id="to-binary"
+                checked={imageConfig.binary}
+                onCheckedChange={(checked) => {
+                  onImageConfiguration(checked, ImageVariable.BINARY);
+                }}
+              />
+              <Label htmlFor="to-binary">To Binary</Label>
+            </div>
+            <div className="flex items-center space-x-2 mt-2 ">
+              <Switch
+                id="histogram-equalization"
+                checked={imageConfig.histogramEqualization}
+                onCheckedChange={(checked) =>
+                  onImageConfiguration(checked, ImageVariable.HISTOGRAM)
+                }
+              />
+              <Label htmlFor="histogram-equalization">
+                Histogram Equalization
+              </Label>
+            </div>
           </div>          
         </div>
-        
 
         {/* Apply button */}
         <div className="mt-4 flex justify-end">

@@ -2,7 +2,11 @@ import ImageUploader from "./ImageUploader";
 import ImageDownloader from "./ImageDownloader";
 import ControlPanel from "./control-panel";
 import { useState } from "react";
-import { imageMatriceToURL } from "../imageUtils/transformations";
+import {
+  equalizeGrayscaleHistogram,
+  imageMatriceToURL,
+  matrixToBinary,
+} from "../imageUtils/transformations";
 import {
   addImages,
   linearCombinationBlend,
@@ -36,11 +40,15 @@ export default function HomePage() {
     conversionType: string;
     orientation: string;
     logicalOp: string;
+    histogramEqualization: boolean;
+    binary: boolean;
   }>({
     arithmeticOperation: "none",
     orientation: "normal",
     conversionType: "none",
     logicalOp: "none",
+    histogramEqualization: false,
+    binary: false,
   });
 
   const handleImageProcessed = (matrix: number[][][], mainImage: boolean) => {
@@ -55,10 +63,12 @@ export default function HomePage() {
     CONVERSION_TYPE,
     ORIENTATION,
     LOGICAL_OPS,
+    HISTOGRAM,
+    BINARY,
   }
 
   const handleImageConfiguration = (
-    value: string,
+    value: string | boolean,
     configuration: ImageVariable
   ) => {
     switch (configuration) {
@@ -66,26 +76,46 @@ export default function HomePage() {
         setImageConfig((prevConfig) => ({
           ...prevConfig,
           logicalOp: "none",
-          arithmeticOperation: value,
+          arithmeticOperation: String(value),
         }));
         break;
       case ImageVariable.CONVERSION_TYPE:
         setImageConfig((prevConfig) => ({
           ...prevConfig,
-          conversionType: value,
+          conversionType: String(value),
         }));
         break;
       case ImageVariable.ORIENTATION:
         setImageConfig((prevConfig) => ({
           ...prevConfig,
-          orientation: value,
+          orientation: String(value),
         }));
         break;
       case ImageVariable.LOGICAL_OPS:
         setImageConfig((prevConfig) => ({
           ...prevConfig,
           arithmeticOperation: "none",
-          logicalOp: value,
+          logicalOp: String(value),
+        }));
+        break;
+      case ImageVariable.HISTOGRAM:
+        setImageConfig((prevConfig) => ({
+          ...prevConfig,
+          arithmeticOperation: "none",
+          logicalOp: "none",
+          conversionType: "grayscale",
+          histogramEqualization: Boolean(value),
+          binary: false,
+        }));
+        break;
+      case ImageVariable.BINARY:
+        setImageConfig((prevConfig) => ({
+          ...prevConfig,
+          arithmeticOperation: "none",
+          logicalOp: "none",
+          conversionType: "none",
+          histogramEqualization: false,
+          binary: Boolean(value),
         }));
         break;
     }
@@ -157,6 +187,14 @@ export default function HomePage() {
         matrixResultant = notOperation(pixelMatrix.matrixA);
       }
 
+      if (imageConfig.histogramEqualization) {
+        matrixResultant = equalizeGrayscaleHistogram(pixelMatrix.matrixA);
+      }
+
+      if (imageConfig.binary) {
+        matrixResultant = matrixToBinary(pixelMatrix.matrixA);
+      }
+
       switch (imageConfig.conversionType) {
         case "grayscale":
           matrixResultant = matrixToGrayscale(matrixResultant);
@@ -198,7 +236,10 @@ export default function HomePage() {
           altText="Processed Image"
         />
       </div>
-      <div id="bottomControl" className="flex flex-row justify-center gap-4 mt-5 ml-24 mr-24 ">
+      <div
+        id="bottomControl"
+        className="flex flex-row justify-center gap-4 mt-5 ml-24 mr-24 "
+      >
         <div className="w-96 h-80">
           <HistogramChart title="Input 1" matrix={pixelMatrix.matrixA} />
         </div>

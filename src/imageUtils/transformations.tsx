@@ -3,16 +3,16 @@ export interface Operation {
   value: number; // The value to be used in the operation
 }
 
-export function checkApplyOperation (operation: Operation, value: number) {
-  switch(operation.type) {
+export function checkApplyOperation(operation: Operation, value: number) {
+  switch (operation.type) {
     case "Add":
-      return Math.min(Math.max((value + operation.value), 0), 255);
+      return Math.min(Math.max(value + operation.value, 0), 255);
     case "Subtract":
-      return Math.min(Math.max((value - operation.value), 0), 255);
+      return Math.min(Math.max(value - operation.value, 0), 255);
     case "Multiply":
-      return Math.min(Math.max((value * operation.value), 0), 255);
+      return Math.min(Math.max(value * operation.value, 0), 255);
     case "Divide":
-      return Math.min(Math.max((value / operation.value), 0), 255);
+      return Math.min(Math.max(value / operation.value, 0), 255);
     default:
       return value;
   }
@@ -104,20 +104,40 @@ export function equalizeGrayscaleHistogram(matrix: number[][][]): number[][][] {
   const numPixels = matrix.length * matrix[0].length;
   const cdfMin = cdf.find((value) => value > 0);
   const equalizationMap = Array(256).fill(0);
-  
+
   for (let i = 0; i < 256; i++) {
-    equalizationMap[i] = Math.round(((cdf[i] - cdfMin) / (numPixels - cdfMin)) * 255);
+    equalizationMap[i] = Math.round(
+      ((cdf[i] - cdfMin) / (numPixels - cdfMin)) * 255
+    );
   }
 
   // Step 4: Apply equalization to each pixel in the matrix
-  const equalizedMatrix = matrix.map(row =>
-    row.map(pixel => {
+  const equalizedMatrix = matrix.map((row) =>
+    row.map((pixel) => {
       const [r, g, b, a = 255] = pixel;
       const intensity = Math.round((r + g + b) / 3);
       const newIntensity = equalizationMap[intensity];
-      return [newIntensity, newIntensity, newIntensity, a]; 
+      return [newIntensity, newIntensity, newIntensity, a];
     })
   );
 
   return equalizedMatrix;
+}
+
+export function matrixToBinary(matrix: number[][][]): number[][][] {
+  const grayScaleMatrix: number[][][] = [];
+
+  for (let y = 0; y < matrix.length; y++) {
+    const row: number[][] = [];
+    for (let x = 0; x < matrix[0].length; x++) {
+      const [r, g, b, a] = matrix[y][x];
+
+      const intensity = Math.floor((r + g + b) / 3) > 128 ? 255 : 0;
+
+      row.push([intensity, intensity, intensity, a]);
+    }
+    grayScaleMatrix.push(row);
+  }
+
+  return grayScaleMatrix;
 }

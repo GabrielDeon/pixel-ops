@@ -35,7 +35,7 @@ export default function ImageUploader({
 }: ImageUploaderProps) {
   const [image, setImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [matrice, setMatrice] = useState<number[][][] | null>(null);  
+  const [matrice, setMatrice] = useState<number[][][] | null>(null);
   const [operation, setOperation] = useState<Operation | null>({
     type: "Add",
     value: 0,
@@ -46,7 +46,7 @@ export default function ImageUploader({
   >("contain");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);  
 
   useEffect(() => {
     if (image) {
@@ -59,7 +59,11 @@ export default function ImageUploader({
         canvas.height = img.height;
 
         const newMatrice = getImageMatrice(img);
-        setMatrice(newMatrice || null);        
+        setMatrice(newMatrice || null);
+
+        if (newMatrice) {
+          onImageProcessed(newMatrice, mainImage);
+        }
       };
       img.src = image;
     }
@@ -71,18 +75,18 @@ export default function ImageUploader({
       if (file.type.startsWith("image/")) {
         const reader = new FileReader();
         reader.onload = (e) => {
-          setImage(e.target?.result as string);
+          setImage(e.target?.result as string);        
           setError(null);
         };
         reader.readAsDataURL(file);
       } else {
         setError("Please upload a valid image file.");
-        setImage(null);
+        setImage(null);        
       }
     }
   };
 
-  const handleApply = () => {    
+  const handleApply = () => {
     if (matrice && operation) {
       const updatedMatrice = matrice.map(row =>
         row.map(pixel => {
@@ -92,7 +96,7 @@ export default function ImageUploader({
         })
       );
       setMatrice(updatedMatrice);
-    }    
+    }
   };
 
   const handleReset = () => {
@@ -107,7 +111,7 @@ export default function ImageUploader({
 
   const handleDrawerClose = () => {
     handleReset();
-    setOperation({ type: "Add", value: 0 });    
+    setOperation({ type: "Add", value: 0 });
   }
 
   const handleButtonClick = () => {
@@ -115,7 +119,7 @@ export default function ImageUploader({
   };
 
   const handleDownload = () => {
-    if(matrice){
+    if (matrice) {
       const downloadURL = imageMatriceToURL(matrice);
       const link = document.createElement("a");
       link.href = downloadURL;
@@ -123,7 +127,7 @@ export default function ImageUploader({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    }    
+    }
   }
 
   return (
@@ -141,11 +145,11 @@ export default function ImageUploader({
                 </DrawerHeader>
                 <div className="flex flex-row space-x-4 justify-center items-stretch">
                   <CanvasComponent
-                    matrice={matrice}                                        
+                    matrice={matrice}
                   />
                   <MatrixOperationsCard
                     operation={operation}
-                    setOperation={setOperation}                    
+                    setOperation={setOperation}
                   />
                 </div>
                 <DrawerFooter className="flex flex-col items-center mt-6">

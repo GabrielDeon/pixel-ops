@@ -18,9 +18,16 @@ import {
   xorOperation,
 } from "@/imageUtils/composite";
 import {
+  conservativeSmoothingFilter,
   flipMatrixHorizontally,
   flipMatrixVertically,
+  gaussianFilter,
   matrixToGrayscale,
+  maxFilter,
+  meanFilter,
+  medianFilter,
+  minFilter,
+  orderFilter,
 } from "@/imageUtils/filters";
 import { HistogramChart } from "./HistogramChart";
 
@@ -183,6 +190,9 @@ export default function HomePage() {
             break;
         }
       }
+
+
+
       if (imageConfig.logicalOp === "not") {
         matrixResultant = notOperation(pixelMatrix.matrixA);
       }
@@ -198,6 +208,28 @@ export default function HomePage() {
       switch (imageConfig.conversionType) {
         case "grayscale":
           matrixResultant = matrixToGrayscale(matrixResultant);
+          break;
+        case "min":
+          matrixResultant = minFilter(matrixResultant);
+          break;
+        case "max":
+          matrixResultant = maxFilter(matrixResultant);
+          break;
+        case "mean":
+          matrixResultant = meanFilter(matrixResultant);
+          break;
+
+        case "median":
+          matrixResultant = medianFilter(matrixResultant);
+          break;
+        case "order":
+          matrixResultant = orderFilter(matrixResultant);
+          break;
+        case "conservative-smoothing":
+          matrixResultant = conservativeSmoothingFilter(matrixResultant);
+          break;
+        case "gaussian":
+          matrixResultant = gaussianFilter(matrixResultant);
           break;
       }
       switch (imageConfig.orientation) {

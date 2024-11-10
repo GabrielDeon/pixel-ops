@@ -92,6 +92,10 @@ export default function ControlPanel({
                 <SelectItem value="min">Min</SelectItem>
                 <SelectItem value="max">Max</SelectItem>
                 <SelectItem value="mean">Mean</SelectItem>
+                <SelectItem value="median">Median</SelectItem>
+                <SelectItem value="order">Order Static</SelectItem>
+                <SelectItem value="conservative-smoothing">Conservative Smoothing</SelectItem>
+                <SelectItem value="gaussian">Gaussian</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -163,7 +167,8 @@ export default function ControlPanel({
                 Histogram Equalization
               </Label>
             </div>
-          </div>          
+            {/* <button onClick={() => alert(imageConfig.arithmeticOperation + "\n" + imageConfig.binary + "\n" + imageConfig.conversionType + "\n" + imageConfig.histogramEqualization + "\n" + imageConfig.logicalOp +  "\n" + imageConfig.orientation)}>INFO</button> */}
+          </div>
         </div>
 
         {/* Apply button */}

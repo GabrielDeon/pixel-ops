@@ -254,6 +254,115 @@ export function gaussianFilter(matrix: number[][][]): number[][][] {
     return resultMatrix;
 }
 
+export function prewittFilter(matrix: number[][][]): number[][][] {
+    const height = matrix.length;
+    const width = matrix[0].length;
+    const resultMatrix: number[][][] = JSON.parse(JSON.stringify(matrix)); // Copia da matriz original
+
+    const kernelX = [
+        [-1, 0, 1],
+        [-1, 0, 1],
+        [-1, 0, 1]
+    ];
+
+    const kernelY = [
+        [-1, -1, -1],
+        [0, 0, 0],
+        [1, 1, 1]
+    ];
+
+    for (let y = 1; y < height - 1; y++) {
+        for (let x = 1; x < width - 1; x++) {
+            let gx = 0, gy = 0;
+
+            for (let j = -1; j <= 1; j++) {
+                for (let i = -1; i <= 1; i++) {
+                    const intensity = matrix[y + j][x + i][0]; // Usando apenas o canal grayscale
+                    gx += intensity * kernelX[j + 1][i + 1];
+                    gy += intensity * kernelY[j + 1][i + 1];
+                }
+            }
+
+            // Cálculo da magnitude da borda
+            const edgeMagnitude = Math.sqrt(gx * gx + gy * gy);
+            const clampedValue = Math.min(Math.max(Math.round(edgeMagnitude), 0), 255);
+            resultMatrix[y][x] = [clampedValue, clampedValue, clampedValue, 255];
+        }
+    }
+
+    return resultMatrix;
+}
+
+export function sobelFilter(matrix: number[][][]): number[][][] {
+    const height = matrix.length;
+    const width = matrix[0].length;
+    const resultMatrix: number[][][] = JSON.parse(JSON.stringify(matrix));
+
+    const kernelX = [
+        [-1, 0, 1],
+        [-2, 0, 2],
+        [-1, 0, 1]
+    ];
+
+    const kernelY = [
+        [-1, -2, -1],
+        [0, 0, 0],
+        [1, 2, 1]
+    ];
+
+    for (let y = 1; y < height - 1; y++) {
+        for (let x = 1; x < width - 1; x++) {
+            let gx = 0, gy = 0;
+
+            for (let j = -1; j <= 1; j++) {
+                for (let i = -1; i <= 1; i++) {
+                    const intensity = matrix[y + j][x + i][0];
+                    gx += intensity * kernelX[j + 1][i + 1];
+                    gy += intensity * kernelY[j + 1][i + 1];
+                }
+            }
+
+            const edgeMagnitude = Math.sqrt(gx * gx + gy * gy);
+            const clampedValue = Math.min(Math.max(Math.round(edgeMagnitude), 0), 255);
+            resultMatrix[y][x] = [clampedValue, clampedValue, clampedValue, 255];
+        }
+    }
+
+    return resultMatrix;
+}
+
+export function laplacianFilter(matrix: number[][][]): number[][][] {
+    const height = matrix.length;
+    const width = matrix[0].length;
+    const resultMatrix: number[][][] = JSON.parse(JSON.stringify(matrix));
+
+    const kernel = [
+        [0, -1, 0],
+        [-1, 4, -1],
+        [0, -1, 0]
+    ];
+
+    for (let y = 1; y < height - 1; y++) {
+        for (let x = 1; x < width - 1; x++) {
+            let laplacianSum = 0;
+
+            for (let j = -1; j <= 1; j++) {
+                for (let i = -1; i <= 1; i++) {
+                    const intensity = matrix[y + j][x + i][0];
+                    laplacianSum += intensity * kernel[j + 1][i + 1];
+                }
+            }
+
+            const clampedValue = Math.min(Math.max(Math.round(laplacianSum), 0), 255);
+            resultMatrix[y][x] = [clampedValue, clampedValue, clampedValue, 255];
+        }
+    }
+
+    return resultMatrix;
+}
+
+
+
 
 
 

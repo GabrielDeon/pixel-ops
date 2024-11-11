@@ -14,11 +14,14 @@ import { Switch } from "@/components/ui/switch";
 interface ControlPanelProps {
   imageConfig: {
     arithmeticOperation: string;
+    logicalOperation: string;
+    morphologicOperation: string;
     orientation: string;
-    conversionType: string;
-    logicalOp: string;
+    lowPassFilter: string;
+    highPassFilter: string;
+    toBinary: boolean;
+    toGrayScale: boolean;
     histogramEqualization: boolean;
-    binary: boolean;
   };
   onImageConfiguration: (
     value: string | boolean,
@@ -30,11 +33,14 @@ interface ControlPanelProps {
 
 enum ImageVariable {
   ARITHMETIC_OPERATION,
-  CONVERSION_TYPE,
+  LOGIC_OPERATION,
+  MORPHOLOGIC_OPERATION,
   ORIENTATION,
-  LOGICAL_OPS,
-  HISTOGRAM,
-  BINARY,
+  LOWPASS_FILTER,
+  HIGHPASS_FILTER,
+  TO_BINARY,
+  TO_GRAYSCALE,
+  HISTOGRAM_EQUALIZATION,
 }
 
 export default function ControlPanel({
@@ -52,7 +58,7 @@ export default function ControlPanel({
       <div className="p-4 flex-grow flex flex-col">
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <Label htmlFor="arithmetic-operation">Arithmetic Operation</Label>
+            <Label htmlFor="arithmetic-operation">Arithmetic Operations</Label>
             <Select
               value={imageConfig.arithmeticOperation}
               onValueChange={(value) =>
@@ -74,42 +80,16 @@ export default function ControlPanel({
               </SelectContent>
             </Select>
           </div>
-
-          <div>
-            <Label htmlFor="conversion-type">Filters</Label>
-            <Select
-              value={imageConfig.conversionType}
-              onValueChange={(value) =>
-                onImageConfiguration(value, ImageVariable.CONVERSION_TYPE)
-              }
-            >
-              <SelectTrigger id="conversion-type">
-                <SelectValue placeholder="Select conversion" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">None</SelectItem>
-                <SelectItem value="grayscale">Grayscale</SelectItem>
-                <SelectItem value="min">Min</SelectItem>
-                <SelectItem value="max">Max</SelectItem>
-                <SelectItem value="mean">Mean</SelectItem>
-                <SelectItem value="median">Median</SelectItem>
-                <SelectItem value="order">Order Static</SelectItem>
-                <SelectItem value="conservative-smoothing">Conservative Smoothing</SelectItem>
-                <SelectItem value="gaussian">Gaussian</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
           <div>
             <Label htmlFor="conversion-type">Logical Operations</Label>
             <Select
-              value={imageConfig.logicalOp}
+              value={imageConfig.logicalOperation}
               onValueChange={(value) =>
-                onImageConfiguration(value, ImageVariable.LOGICAL_OPS)
+                onImageConfiguration(value, ImageVariable.LOGIC_OPERATION)
               }
             >
               <SelectTrigger id="logical-operations">
-                <SelectValue placeholder="Select Logical Operation" />
+                <SelectValue placeholder="Select operation" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">None</SelectItem>
@@ -120,8 +100,28 @@ export default function ControlPanel({
               </SelectContent>
             </Select>
           </div>
-
-          <div className="row-span-2">
+          <div>
+            <Label htmlFor="conversion-type">Morphologic Operations</Label>
+            <Select
+              value={imageConfig.morphologicOperation}
+              onValueChange={(value) =>
+                onImageConfiguration(value, ImageVariable.MORPHOLOGIC_OPERATION)
+              }
+            >
+              <SelectTrigger id="morphologic-operation">
+                <SelectValue placeholder="Select operation" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="dilation">Dilation</SelectItem>
+                <SelectItem value="erosion">Erosion</SelectItem>
+                <SelectItem value="opening">Opening</SelectItem>
+                <SelectItem value="closing">Closing</SelectItem>
+                <SelectItem value="outline">Outline</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
             <Label>Orientation</Label>
             <RadioGroup
               value={imageConfig.orientation}
@@ -144,36 +144,104 @@ export default function ControlPanel({
               </div>
             </RadioGroup>
           </div>
+
+
+
+
+          <div>
+            <Label htmlFor="conversion-type">Low-Pass Filter</Label>
+            <Select
+              value={imageConfig.lowPassFilter}
+              onValueChange={(value) =>
+                onImageConfiguration(value, ImageVariable.LOWPASS_FILTER)
+              }
+            >
+              <SelectTrigger id="lowpass-filter">
+                <SelectValue placeholder="Select filter" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="min">Min</SelectItem>
+                <SelectItem value="max">Max</SelectItem>
+                <SelectItem value="mean">Mean</SelectItem>
+                <SelectItem value="median">Median</SelectItem>
+                <SelectItem value="order">Order Static</SelectItem>
+                <SelectItem value="conservative-smoothing">Conservative Smoothing</SelectItem>
+                <SelectItem value="gaussian">Gaussian</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="conversion-type">High-Pass Filter</Label>
+            <Select
+              value={imageConfig.highPassFilter}
+              onValueChange={(value) =>
+                onImageConfiguration(value, ImageVariable.HIGHPASS_FILTER)
+              }
+            >
+              <SelectTrigger id="logical-operations">
+                <SelectValue placeholder="Select Logical Operation" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="prewitt">Prewitt (1st)</SelectItem>
+                <SelectItem value="sobel">Sobel (1st)</SelectItem>
+                <SelectItem value="laplacian">Laplacian (2nd)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex items-center space-x-2 mt-2 gap-1">
             <div className="flex items-center space-x-2 mt-2 ">
               <Switch
                 id="to-binary"
-                checked={imageConfig.binary}
+                checked={imageConfig.toBinary}
                 onCheckedChange={(checked) => {
-                  onImageConfiguration(checked, ImageVariable.BINARY);
+                  onImageConfiguration(checked, ImageVariable.TO_BINARY);
                 }}
               />
               <Label htmlFor="to-binary">To Binary</Label>
             </div>
             <div className="flex items-center space-x-2 mt-2 ">
               <Switch
+                id="grayscale"
+                checked={imageConfig.toGrayScale}
+                onCheckedChange={(checked) =>
+                  onImageConfiguration(checked, ImageVariable.TO_GRAYSCALE)
+                }
+              />
+              <Label htmlFor="histogram-equalization">
+                Grayscale
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2 mt-2 ">
+              <Switch
                 id="histogram-equalization"
                 checked={imageConfig.histogramEqualization}
                 onCheckedChange={(checked) =>
-                  onImageConfiguration(checked, ImageVariable.HISTOGRAM)
+                  onImageConfiguration(checked, ImageVariable.HISTOGRAM_EQUALIZATION)
                 }
               />
               <Label htmlFor="histogram-equalization">
                 Histogram Equalization
               </Label>
             </div>
-            {/* <button onClick={() => alert(imageConfig.arithmeticOperation + "\n" + imageConfig.binary + "\n" + imageConfig.conversionType + "\n" + imageConfig.histogramEqualization + "\n" + imageConfig.logicalOp +  "\n" + imageConfig.orientation)}>INFO</button> */}
+            <div className=" flex self-end">
+              <Button onClick={onApply}>Apply</Button>
+            </div>
+            {/* <button onClick={() => {
+              console.log('Current imageConfig state:');
+              console.log(`Arithmetic Operation: ${imageConfig.arithmeticOperation}`);
+              console.log(`Logical Operation: ${imageConfig.logicalOperation}`);
+              console.log(`Morphologic Operation: ${imageConfig.morphologicOperation}`);
+              console.log(`Orientation: ${imageConfig.orientation}`);
+              console.log(`Low Pass Filter: ${imageConfig.lowPassFilter}`);
+              console.log(`High Pass Filter: ${imageConfig.highPassFilter}`);
+              console.log(`To Binary: ${imageConfig.toBinary}`);
+              console.log(`To Grayscale: ${imageConfig.toGrayScale}`);
+              console.log(`Histogram Equalization: ${imageConfig.histogramEqualization}`);
+            }}>INFO</button> */}
           </div>
-        </div>
-
-        {/* Apply button */}
-        <div className="mt-4 flex justify-end">
-          <Button onClick={onApply}>Apply</Button>
         </div>
       </div>
     </Card>

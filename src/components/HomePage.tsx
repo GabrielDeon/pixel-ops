@@ -22,12 +22,15 @@ import {
   flipMatrixHorizontally,
   flipMatrixVertically,
   gaussianFilter,
+  laplacianFilter,
   matrixToGrayscale,
   maxFilter,
   meanFilter,
   medianFilter,
   minFilter,
   orderFilter,
+  prewittFilter,
+  sobelFilter,
 } from "@/imageUtils/filters";
 import { HistogramChart } from "./HistogramChart";
 
@@ -44,18 +47,24 @@ export default function HomePage() {
 
   const [imageConfig, setImageConfig] = useState<{
     arithmeticOperation: string;
-    conversionType: string;
+    logicalOperation: string;
+    morphologicOperation: string;
     orientation: string;
-    logicalOp: string;
+    lowPassFilter: string;
+    highPassFilter: string;
+    toBinary: boolean;
+    toGrayScale: boolean;
     histogramEqualization: boolean;
-    binary: boolean;
   }>({
     arithmeticOperation: "none",
+    logicalOperation: "none",
+    morphologicOperation: "none",
     orientation: "normal",
-    conversionType: "none",
-    logicalOp: "none",
+    lowPassFilter: "none",
+    highPassFilter: "none",
+    toBinary: false,
+    toGrayScale: false,
     histogramEqualization: false,
-    binary: false,
   });
 
   const handleImageProcessed = (matrix: number[][][], mainImage: boolean) => {
@@ -67,11 +76,14 @@ export default function HomePage() {
 
   enum ImageVariable {
     ARITHMETIC_OPERATION,
-    CONVERSION_TYPE,
+    LOGIC_OPERATION,
+    MORPHOLOGIC_OPERATION,
     ORIENTATION,
-    LOGICAL_OPS,
-    HISTOGRAM,
-    BINARY,
+    LOWPASS_FILTER,
+    HIGHPASS_FILTER,
+    TO_BINARY,
+    TO_GRAYSCALE,
+    HISTOGRAM_EQUALIZATION,
   }
 
   const handleImageConfiguration = (
@@ -82,14 +94,21 @@ export default function HomePage() {
       case ImageVariable.ARITHMETIC_OPERATION:
         setImageConfig((prevConfig) => ({
           ...prevConfig,
-          logicalOp: "none",
+          logicalOperation: "none",
           arithmeticOperation: String(value),
         }));
         break;
-      case ImageVariable.CONVERSION_TYPE:
+      case ImageVariable.LOGIC_OPERATION:
         setImageConfig((prevConfig) => ({
           ...prevConfig,
-          conversionType: String(value),
+          logicalOperation: String(value),
+          arithmeticOperation: "none",
+        }));
+        break;
+      case ImageVariable.MORPHOLOGIC_OPERATION:
+        setImageConfig((prevConfig) => ({
+          ...prevConfig,
+          morphologicOperation: String(value),
         }));
         break;
       case ImageVariable.ORIENTATION:
@@ -98,31 +117,36 @@ export default function HomePage() {
           orientation: String(value),
         }));
         break;
-      case ImageVariable.LOGICAL_OPS:
+      case ImageVariable.LOWPASS_FILTER:
         setImageConfig((prevConfig) => ({
           ...prevConfig,
-          arithmeticOperation: "none",
-          logicalOp: String(value),
+          lowPassFilter: String(value),
         }));
         break;
-      case ImageVariable.HISTOGRAM:
+      case ImageVariable.HIGHPASS_FILTER:
         setImageConfig((prevConfig) => ({
           ...prevConfig,
-          arithmeticOperation: "none",
-          logicalOp: "none",
-          conversionType: "grayscale",
+          highPassFilter: String(value),
+        }));
+        break;
+      case ImageVariable.HISTOGRAM_EQUALIZATION:
+        setImageConfig((prevConfig) => ({
+          ...prevConfig,
           histogramEqualization: Boolean(value),
-          binary: false,
         }));
         break;
-      case ImageVariable.BINARY:
+      case ImageVariable.TO_BINARY:
         setImageConfig((prevConfig) => ({
           ...prevConfig,
-          arithmeticOperation: "none",
-          logicalOp: "none",
-          conversionType: "none",
-          histogramEqualization: false,
-          binary: Boolean(value),
+          toBinary: Boolean(value),
+          toGrayScale: false,
+        }));
+        break;
+      case ImageVariable.TO_GRAYSCALE:
+        setImageConfig((prevConfig) => ({
+          ...prevConfig,
+          toBinary: false,
+          toGrayScale: Boolean(value),
         }));
         break;
     }
@@ -133,41 +157,28 @@ export default function HomePage() {
     if (pixelMatrix.matrixA.length) {
       let matrixResultant: number[][][] = pixelMatrix.matrixA;
 
-      //Check if has two inputs
+      // Handle two-image operations first
       if (pixelMatrix.matrixB.length) {
-        switch (imageConfig.logicalOp) {
+        // Logical operations
+        switch (imageConfig.logicalOperation) {
           case "and":
-            matrixResultant = andOperation(
-              pixelMatrix.matrixA,
-              pixelMatrix.matrixB
-            );
+            matrixResultant = andOperation(pixelMatrix.matrixA, pixelMatrix.matrixB);
             break;
           case "or":
-            matrixResultant = orOperation(
-              pixelMatrix.matrixA,
-              pixelMatrix.matrixB
-            );
+            matrixResultant = orOperation(pixelMatrix.matrixA, pixelMatrix.matrixB);
             break;
           case "xor":
-            matrixResultant = xorOperation(
-              pixelMatrix.matrixA,
-              pixelMatrix.matrixB
-            );
+            matrixResultant = xorOperation(pixelMatrix.matrixA, pixelMatrix.matrixB);
             break;
         }
 
+        // Arithmetic operations
         switch (imageConfig.arithmeticOperation) {
           case "add":
-            matrixResultant = addImages(
-              pixelMatrix.matrixA,
-              pixelMatrix.matrixB
-            );
+            matrixResultant = addImages(pixelMatrix.matrixA, pixelMatrix.matrixB);
             break;
           case "subtract":
-            matrixResultant = subtractImages(
-              pixelMatrix.matrixA,
-              pixelMatrix.matrixB
-            );
+            matrixResultant = subtractImages(pixelMatrix.matrixA, pixelMatrix.matrixB);
             break;
           case "difference":
             matrixResultant = addImages(
@@ -191,24 +202,26 @@ export default function HomePage() {
         }
       }
 
+      // Single image operations
+      if (imageConfig.logicalOperation === "not") {
+        matrixResultant = notOperation(matrixResultant);
+      }
 
+      // Apply transformations in order
+      if (imageConfig.toGrayScale) {
+        matrixResultant = matrixToGrayscale(matrixResultant);
+      }
 
-      if (imageConfig.logicalOp === "not") {
-        matrixResultant = notOperation(pixelMatrix.matrixA);
+      if (imageConfig.toBinary) {
+        matrixResultant = matrixToBinary(matrixResultant);
       }
 
       if (imageConfig.histogramEqualization) {
-        matrixResultant = equalizeGrayscaleHistogram(pixelMatrix.matrixA);
+        matrixResultant = equalizeGrayscaleHistogram(matrixResultant);
       }
 
-      if (imageConfig.binary) {
-        matrixResultant = matrixToBinary(pixelMatrix.matrixA);
-      }
-
-      switch (imageConfig.conversionType) {
-        case "grayscale":
-          matrixResultant = matrixToGrayscale(matrixResultant);
-          break;
+      // Apply filters
+      switch (imageConfig.lowPassFilter) {
         case "min":
           matrixResultant = minFilter(matrixResultant);
           break;
@@ -218,7 +231,6 @@ export default function HomePage() {
         case "mean":
           matrixResultant = meanFilter(matrixResultant);
           break;
-
         case "median":
           matrixResultant = medianFilter(matrixResultant);
           break;
@@ -232,6 +244,20 @@ export default function HomePage() {
           matrixResultant = gaussianFilter(matrixResultant);
           break;
       }
+
+      switch (imageConfig.highPassFilter) {
+        case "prewitt":
+          matrixResultant = prewittFilter(matrixResultant);
+          break;
+        case "sobel":
+          matrixResultant = sobelFilter(matrixResultant);
+          break;
+        case "laplacian":
+          matrixResultant = laplacianFilter(matrixResultant);
+          break;
+      }
+
+      // Apply orientation changes last
       switch (imageConfig.orientation) {
         case "flip-horizontal":
           matrixResultant = flipMatrixHorizontally(matrixResultant);
@@ -272,13 +298,13 @@ export default function HomePage() {
         id="bottomControl"
         className="flex flex-row justify-center gap-4 mt-5 ml-24 mr-24 "
       >
-        <div className="w-96 h-80">
+        <div className="w-96 ">
           <HistogramChart title="Input 1" matrix={pixelMatrix.matrixA} />
         </div>
-        <div className="w-96 h-80">
+        <div className="w-96 ">
           <HistogramChart title="Input 2" matrix={pixelMatrix.matrixB} />
         </div>
-        <div className="w-96 h-80">
+        <div className="w-96 ">
           <HistogramChart title="Result" matrix={resultantMatrix} />
         </div>
       </div>
